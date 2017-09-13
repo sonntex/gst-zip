@@ -18,6 +18,14 @@ AC_CHECK_PROG(HAVE_PKGCONFIG, pkg-config, [ ], [
   AC_MSG_ERROR([You need to have pkg-config installed!])
 ])
 
+PKG_CHECK_MODULES(ZLIB, [zlib])
+AC_SUBST(ZLIB_CFLAGS)
+AC_SUBST(ZLIB_LIBS)
+
+PKG_CHECK_MODULES(BZLIB2, [bzlib2])
+AC_SUBST(BZLIB2_CFLAGS)
+AC_SUBST(BZLIB2_LIBS)
+
 AC_ARG_ENABLE(gst1,
   AS_HELP_STRING([--enable-gst1=@<:@no/yes@:>@], [Build with gstreamer 1.0.]),,
   enable_gst1=yes)
