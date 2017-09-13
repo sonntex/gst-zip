@@ -47,7 +47,7 @@ struct _GstZipGzDec
   z_stream strm;
 };
 
-struct _GstZipGzDecClass 
+struct _GstZipGzDecClass
 {
   GstZipBaseDecClass parent_class;
 };

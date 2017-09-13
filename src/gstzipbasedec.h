@@ -54,7 +54,7 @@ struct _GstZipBaseDec
   goffset buf_offset;
 };
 
-struct _GstZipBaseDecClass 
+struct _GstZipBaseDecClass
 {
   GstElementClass parent_class;
 

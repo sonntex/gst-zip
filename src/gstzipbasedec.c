@@ -177,7 +177,7 @@ gst_zip_base_dec_chain (GstPad *pad, GstBuffer *buf)
 {
   GstZipBaseDec *dec = GST_ZIP_BASE_DEC (GST_OBJECT_PARENT (pad));
   GstZipBaseDecClass *dec_class = GST_ZIP_BASE_DEC_GET_CLASS (dec);
-  
+
 #ifdef HAVE_GST1
   GstMapInfo buf_map;
 #endif
@@ -344,7 +344,7 @@ gst_zip_base_dec_reset (GstZipBaseDec *dec)
   dec->buf_size = GST_BUFFER_SIZE (dec->buf);
   dec->buf_data = GST_BUFFER_DATA (dec->buf);
 #endif
-  dec->buf_offset = 0;  
+  dec->buf_offset = 0;
 }
 
 static void
@@ -371,7 +371,7 @@ static void
 gst_zip_base_dec_shrink (GstZipBaseDec *dec)
 {
 #ifdef HAVE_GST1
-   gst_buffer_unmap (dec->buf, &dec->buf_map);
+  gst_buffer_unmap (dec->buf, &dec->buf_map);
 #endif
 
   dec->buf_size = dec->buf_offset;
