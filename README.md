@@ -31,6 +31,15 @@ gstreamer 1.0:
 
     ./configure --disable-gst1
 
+## Test
+Use scripts from tests directory to test the plugin and find memory
+leaks:
+
+    cd tests
+    . ./vars-memory-leaks.sh
+    ./test.sh -o
+    ./test.sh -n
+
 ## Run
 
 Use zipgzdec to decompress gzip compressed data:

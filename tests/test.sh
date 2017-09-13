@@ -37,7 +37,7 @@ gzip -c sample.webm >sample.webm.gz
 
 for buffer_capacity in 2048 4096 6144; do
     echo -n "zipgzdec ($buffer_capacity): "
-    gst-launch-$gst_ver filesrc location=sample.webm.gz ! zipgzdec buffer-capacity=$buffer_capacity ! filesink location=sample-copy.webm &>/dev/null
+    gst-launch-$gst_ver -qe filesrc location=sample.webm.gz ! zipgzdec buffer-capacity=$buffer_capacity ! filesink location=sample-copy.webm
     diff sample.webm sample-copy.webm &>/dev/null
     if [ $? -eq 0 ]; then
         echo "yes"
@@ -50,7 +50,7 @@ bzip2 -c sample.webm >sample.webm.bz2
 
 for buffer_capacity in 2048 4096 6144; do
     echo -n "zipbz2dec ($buffer_capacity): "
-    gst-launch-$gst_ver filesrc location=sample.webm.bz2 ! zipbz2dec buffer-capacity=$buffer_capacity ! filesink location=sample-copy.webm &>/dev/null
+    gst-launch-$gst_ver -qe filesrc location=sample.webm.bz2 ! zipbz2dec buffer-capacity=$buffer_capacity ! filesink location=sample-copy.webm
     diff sample.webm sample-copy.webm &>/dev/null
     if [ $? -eq 0 ]; then
         echo "yes"
