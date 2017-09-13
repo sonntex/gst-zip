@@ -74,7 +74,7 @@ static GstStateChangeReturn gst_zip_base_dec_change_state (GstElement *element, 
 
 static gboolean gst_zip_base_dec_start (GstZipBaseDec *dec);
 static void gst_zip_base_dec_stop (GstZipBaseDec *dec);
-static void gst_zip_base_dec_push (GstZipBaseDec *dec);
+static gboolean gst_zip_base_dec_push (GstZipBaseDec *dec);
 static void gst_zip_base_dec_reset (GstZipBaseDec *dec);
 static void gst_zip_base_dec_drop (GstZipBaseDec *dec);
 static void gst_zip_base_dec_shrink (GstZipBaseDec *dec);
@@ -175,6 +175,7 @@ static GstFlowReturn
 gst_zip_base_dec_chain (GstPad *pad, GstBuffer *buf)
 #endif
 {
+  GstFlowReturn ret = GST_FLOW_OK;
   GstZipBaseDec *dec = GST_ZIP_BASE_DEC (GST_OBJECT_PARENT (pad));
   GstZipBaseDecClass *dec_class = GST_ZIP_BASE_DEC_GET_CLASS (dec);
 
@@ -207,7 +208,7 @@ gst_zip_base_dec_chain (GstPad *pad, GstBuffer *buf)
     GST_TRACE_OBJECT (dec, "decompress");
 
     if (!dec_class->zip_decompress (dec)) {
-      gst_zip_base_dec_drop (dec);
+      ret = GST_FLOW_ERROR;
       goto done;
     }
 
@@ -216,8 +217,14 @@ gst_zip_base_dec_chain (GstPad *pad, GstBuffer *buf)
 
     dec->buf_offset = dec->buf_size - dec_class->zip_avail_out (dec);
 
-    if (dec->buf_offset == dec->buf_size)
-      gst_zip_base_dec_push (dec);
+    if (dec->buf_offset == dec->buf_size) {
+      if (!gst_zip_base_dec_push (dec)) {
+        ret = GST_FLOW_ERROR;
+        goto done;
+      }
+
+      gst_zip_base_dec_reset (dec);
+    }
   }
 
 done:
@@ -228,7 +235,7 @@ done:
 
   gst_buffer_unref (buf);
 
-  return GST_FLOW_OK;
+  return ret;
 }
 
 #ifdef HAVE_GST1
@@ -312,9 +319,14 @@ gst_zip_base_dec_stop (GstZipBaseDec *dec)
   gst_zip_base_dec_drop (dec);
 }
 
-static void
+static gboolean
 gst_zip_base_dec_push (GstZipBaseDec *dec)
 {
+  gboolean ret;
+
+  if (!dec->buf)
+    return FALSE;
+
   GST_TRACE_OBJECT (dec, "push");
 
   if (dec->buf_offset > 0 &&
@@ -325,9 +337,14 @@ gst_zip_base_dec_push (GstZipBaseDec *dec)
   gst_buffer_unmap (dec->buf, &dec->buf_map);
 #endif
 
-  gst_pad_push (dec->srcpad, dec->buf);
+  ret = gst_pad_push (dec->srcpad, dec->buf) == GST_FLOW_OK;
 
-  gst_zip_base_dec_reset (dec);
+  dec->buf = NULL;
+  dec->buf_size = 0;
+  dec->buf_data = NULL;
+  dec->buf_offset = 0;
+
+  return ret;
 }
 
 static void
