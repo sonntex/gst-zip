@@ -370,39 +370,24 @@ gst_zip_base_dec_drop (GstZipBaseDec *dec)
 static void
 gst_zip_base_dec_shrink (GstZipBaseDec *dec)
 {
-  GstBuffer *buf;
 #ifdef HAVE_GST1
-  GstMapInfo buf_map;
+   gst_buffer_unmap (dec->buf, &dec->buf_map);
 #endif
-  gsize buf_size;
-  gpointer buf_data;
 
-  GST_TRACE_OBJECT (dec, "shrink");
-
-  buf = gst_buffer_new_and_alloc (dec->buf_offset);
+  dec->buf_size = dec->buf_offset;
 
 #ifdef HAVE_GST1
-  gst_buffer_map (buf, &buf_map, GST_MAP_WRITE);
-  buf_size = buf_map.size;
-  buf_data = buf_map.data;
+  gst_buffer_set_size (dec->buf, dec->buf_size);
 #else
-  buf_size = GST_BUFFER_SIZE (buf);
-  buf_data = GST_BUFFER_DATA (buf);
+  GST_BUFFER_SIZE (dec->buf) = dec->buf_size;
 #endif
-
-  memmove (buf_data, dec->buf_data, buf_size);
 
 #ifdef HAVE_GST1
-  gst_buffer_unmap (dec->buf, &dec->buf_map);
+  gst_buffer_map (dec->buf, &dec->buf_map, GST_MAP_WRITE);
+  dec->buf_size = dec->buf_map.size;
+  dec->buf_data = dec->buf_map.data;
+#else
+  dec->buf_size = GST_BUFFER_SIZE (dec->buf);
+  dec->buf_data = GST_BUFFER_DATA (dec->buf);
 #endif
-
-  gst_buffer_unref (dec->buf);
-
-  dec->buf = buf;
-#ifdef HAVE_GST1
-  dec->buf_map = buf_map;
-#endif
-  dec->buf_size = buf_size;
-  dec->buf_data = buf_data;
-  dec->buf_offset = buf_size;
 }
